@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn tập Bài 1: 你在听什么？ - 中文乐园</title>
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=ZCOOL+KuaiLe&display=swap');
+
+        :root {
+            --primary: #4facfe;
+            --secondary: #ff6b6b;
+            --accent: #ffd93d;
+            --text-color: #2d3436;
+            --card-bg: rgba(255, 255, 255, 0.92);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Quicksand', 'Segoe UI', sans-serif;
+            margin: 0; padding: 0;
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(-45deg, #a8edea, #fed6e3, #a8edea, #d4fc79);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .particle-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            background: rgba(255,255,255,0.65);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        .app-wrapper { position: relative; z-index: 1; }
+
+        header {
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 15px 5%;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+            border-bottom: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .logo {
+            font-family: 'ZCOOL KuaiLe', cursive, sans-serif;
+            font-size: 1.8rem; color: #1a5276; margin: 0;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .logo-icon { font-size: 2rem; animation: bounce 2s infinite; display: inline-block; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .speed-control {
+            background: white; padding: 5px 15px; border-radius: 30px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            font-weight: 700; font-size: 0.9rem;
+        }
+        .speed-control input { accent-color: var(--primary); cursor: pointer; }
+
+        nav {
+            display: flex; justify-content: center; gap: 10px;
+            margin: 20px auto; flex-wrap: wrap; max-width: 1000px; padding: 0 15px;
+        }
+
+        nav button {
+            background: white; border: none;
+            padding: 10px 22px; border-radius: 30px;
+            font-size: 1rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; color: #555;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+        }
+        nav button:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+        nav button.active { background: var(--primary); color: white; box-shadow: 0 6px 16px rgba(79,172,254,0.4); }
+
+        .container { max-width: 1000px; margin: 0 auto 40px; padding: 0 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeSlideIn 0.4s ease-out; }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+        .vocab-card {
+            background: var(--card-bg); padding: 20px; border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, opacity 0.5s;
+            opacity: 0; transform: translateY(20px);
+        }
+        .vocab-card.show { opacity: 1; transform: translateY(0); }
+        .vocab-card:hover { transform: translateY(-6px) rotate(0.5deg); box-shadow: 0 14px 28px rgba(0,0,0,0.1); }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .vocab-word { font-size: 1.6rem; font-weight: 900; color: #1a5276; font-family: 'ZCOOL KuaiLe', cursive; }
+        .vocab-pinyin { color: var(--secondary); font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+        .vocab-meaning { color: #636e72; font-style: italic; font-size: 0.9rem; margin-bottom: 12px; }
+
+        .btn-speak {
+            background: #e3f2fd; color: var(--primary); border: none;
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+            font-size: 1.1rem; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-speak:hover { background: var(--primary); color: white; transform: scale(1.1); }
+
+        .example-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        .example-item {
+            background: #f8f9fa; padding: 10px; border-radius: 8px;
+            border-left: 3px solid var(--accent); cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column;
+        }
+        .example-item:hover { background: #fffbeb; transform: translateX(3px); }
+        .ex-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .ex-cn { font-size: 0.95rem; font-weight: 700; color: #2d3436; }
+        .ex-icon { font-size: 0.9rem; opacity: 0.6; transition: 0.2s; }
+        .example-item:hover .ex-icon { opacity: 1; color: var(--secondary); transform: scale(1.1); }
+        .ex-py { font-size: 0.8rem; color: #b2bec3; display: block; margin-top: 2px; }
+        .ex-vi { font-size: 0.8rem; color: #636e72; font-style: italic; display: block; }
+
+        .btn-write {
+            width: 100%; padding: 10px; border: none; border-radius: 10px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white; font-weight: 700; font-family: inherit; cursor: pointer;
+            transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 6px;
+        }
+        .btn-write:hover { opacity: 0.9; transform: scale(0.98); }
+
+        .grammar-box {
+            background: var(--card-bg); padding: 20px; border-radius: 18px; margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.8);
+        }
+        .grammar-box h3 { color: #1a5276; margin-top: 0; border-bottom: 2px dashed #e3f2fd; padding-bottom: 10px; }
+        .grammar-example {
+            background: #f0f9ff; padding: 12px; border-radius: 10px; margin: 10px 0;
+            cursor: pointer; transition: 0.2s; border-left: 4px solid var(--primary);
+        }
+        .grammar-example:hover { background: #e1f5fe; transform: translateX(5px); }
+
+        .exercise-item {
+            background: var(--card-bg); padding: 20px; border-radius: 18px; margin-bottom: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.8);
+        }
+        .exercise-item .q-text { font-weight: 700; margin-top: 0; font-size: 1.05rem; color: #2d3436; }
+        .exercise-item .q-pinyin { font-size: 0.85rem; color: #636e72; margin-bottom: 12px; font-style: italic; }
+        .exercise-item button {
+            display: block; width: 100%; text-align: left;
+            padding: 10px 15px; margin: 8px 0; border-radius: 12px;
+            border: 2px solid #f1f2f6; background: #fff;
+            font-family: inherit; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; transition: 0.2s;
+        }
+        .exercise-item button .opt-py { font-size: 0.8rem; color: #b2bec3; font-weight: normal; display: block; margin-top: 2px;}
+        .exercise-item button:hover { border-color: var(--primary); background: #f0f9ff; }
+        .exercise-item button.correct { background: #d1f2eb; border-color: #2ecc71; color: #1e8449; }
+        .exercise-item button.correct .opt-py { color: #1e8449; }
+        .exercise-item button.wrong { background: #fadbd8; border-color: #e74c3c; color: #922b21; }
+        .exercise-item button.wrong .opt-py { color: #922b21; }
+
+        .game-wrapper {
+            background: var(--card-bg); padding: 20px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.8);
+        }
+        .game-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .game-tab-btn {
+            padding: 10px 25px; border-radius: 30px; border: none; cursor: pointer;
+            font-family: inherit; font-weight: 700; color: white; transition: 0.2s;
+        }
+        .game-tab-btn.fruit { background: #ff7675; }
+        .game-tab-btn.memory { background: #a29bfe; }
+        .game-tab-btn.active { transform: scale(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        .game-panel { display: none; }
+        .game-panel.active { display: block; }
+
+        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .score-board { font-weight: 800; font-size: 1.05rem; color: #2d3436; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .combo-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white; padding: 3px 12px; border-radius: 20px;
+            font-size: 0.85rem; font-weight: 700;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .combo-badge.active { opacity: 1; }
+        .btn-restart {
+            background: var(--accent); border: none; padding: 6px 15px; border-radius: 20px;
+            font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .btn-restart:hover { filter: brightness(0.9); }
+
+        #canvas-fruit {
+            width: 100%; height: 440px; background: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            border-radius: 16px; cursor: crosshair; display: block;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.4);
+            touch-action: none;
+        }
+
+        .memory-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            max-width: 600px; margin: 0 auto; perspective: 1000px;
+        }
+        .memory-card {
+            background: transparent; aspect-ratio: 3/4; cursor: pointer; position: relative;
+        }
+        .memory-card-inner {
+            position: relative; width: 100%; height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d; border-radius: 12px;
+        }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+        .memory-card.matched .memory-card-inner { transform: rotateY(180deg); filter: drop-shadow(0 0 12px var(--accent)); }
+
+        .memory-front, .memory-back {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            text-align: center; padding: 8px; font-weight: 700; box-sizing: border-box;
+        }
+        .memory-front {
+            background: linear-gradient(135deg, #a29bfe, #81ecec);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color: white; font-size: 1.5rem;
+        }
+        .memory-front::before { content: "?"; font-family: 'ZCOOL KuaiLe', cursive; }
+        .memory-back {
+            background: white; transform: rotateY(180deg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid #dfe6e9;
+            color: #2d3436; font-size: 1rem; word-break: break-word; flex-direction: column;
+        }
+
+        .modal {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal.active { display: flex; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content {
+            background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .modal-header h3 { margin: 0; font-family: 'ZCOOL KuaiLe', cursive; font-size: 1.5rem; color: #1a5276; }
+        .btn-close-modal {
+            background: #ffeaa7; border: none; font-size: 1.2rem; width: 35px; height: 35px;
+            border-radius: 50%; cursor: pointer; font-weight: 900; color: #b38b00;
+        }
+
+        .writing-area { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
+        .stroke-target, #canvas-drawing {
+            width: 150px; height: 150px; border-radius: 12px;
+            border: 2px dashed #dfe6e9; background: #f8f9fa;
+        }
+        .writing-controls { display: flex; gap: 10px; }
+        .writing-controls button {
+            flex: 1; padding: 10px; border-radius: 10px; border: none; cursor: pointer;
+            font-weight: 700; font-family: inherit; color: white; transition: 0.2s;
+        }
+        .btn-clear { background: #ff7675; }
+        .btn-undo { background: #fdcb6e; color: #b38b00; }
+        .writing-controls button:hover { opacity: 0.8; }
+
+        @media (max-width: 600px) {
+            .vocab-grid { grid-template-columns: 1fr; }
+            .memory-grid { grid-template-columns: repeat(4, 1fr); gap: 5px; }
+            .memory-back { font-size: 0.75rem; }
+            #canvas-fruit { height: 340px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="particle-layer" id="particles"></div>
+
+    <div class="app-wrapper">
+        <header>
+            <h1 class="logo"><span class="logo-icon">🎧</span>中文乐园 · Bài 1</h1>
+            <div class="speed-control">
+                <span>⚡ Tốc độ:</span>
+                <input type="range" id="speed-slider" min="0.5" max="1.5" step="0.1" value="0.9">
+                <span id="speed-val">0.9x</span>
+            </div>
+        </header>
+
+        <nav>
+            <button class="active" onclick="switchTab('vocab', this)">📚 Từ vựng</button>
+            <button onclick="switchTab('grammar', this)">📖 Ngữ pháp</button>
+            <button onclick="switchTab('exercise', this)">📝 Bài tập</button>
+            <button onclick="switchTab('games', this)">🎮 Trò chơi</button>
+        </nav>
+
+        <div class="container">
+            <div id="tab-vocab" class="tab-content active">
+                <div class="vocab-grid" id="vocab-container"></div>
+            </div>
+
+            <div id="tab-grammar" class="tab-content">
+                <div class="grammar-box">
+                    <h3>1. Hành động đang diễn ra</h3>
+                    <p><b>Chủ ngữ + 在 / 正在 / 正 + Động từ (+ 呢)</b></p>
+                    <p style="color:#636e72; font-size:0.9rem;">Diễn tả hành động đang diễn ra tại thời điểm nói.</p>
+                    <div class="grammar-example" onclick="speak('我正在听音乐呢。')">
+                        <b>我正在听音乐呢。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Wǒ zhèngzài tīng yīnyuè ne.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Tôi đang nghe nhạc.</span>
+                    </div>
+                    <div class="grammar-example" onclick="speak('妈妈正在做晚饭。')">
+                        <b>妈妈正在做晚饭。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Māma zhèngzài zuò wǎnfàn.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Mẹ đang nấu cơm tối.</span>
+                    </div>
+                </div>
+
+                <div class="grammar-box">
+                    <h3>2. Hai hành động cùng lúc</h3>
+                    <p><b>Chủ ngữ + 一边 + Động từ 1 + 一边 + Động từ 2</b></p>
+                    <p style="color:#636e72; font-size:0.9rem;">Diễn tả hai hoặc nhiều hành động được thực hiện cùng lúc.</p>
+                    <div class="grammar-example" onclick="speak('她一边唱歌，一边跳舞。')">
+                        <b>她一边唱歌，一边跳舞。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Tā yìbiān chànggē, yìbiān tiàowǔ.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Cô ấy vừa hát vừa nhảy.</span>
+                    </div>
+                </div>
+
+                <div class="grammar-box">
+                    <h3>3. Phó từ: 常 / 常常 / 不常</h3>
+                    <p><b>常 (cháng) = 常常 (chángcháng) = Thường xuyên</b></p>
+                    <p><b>不常 (bù cháng) = Không thường xuyên</b></p>
+                    <div class="grammar-example" onclick="speak('我常常周末去打球。')">
+                        <b>我常常周末去打球。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Wǒ chángcháng zhōumò qù dǎ qiú.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Tôi thường đi chơi bóng vào cuối tuần.</span>
+                    </div>
+                    <div class="grammar-example" onclick="speak('我不常看电影。')">
+                        <b>我不常看电影。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Wǒ bù cháng kàn diànyǐng.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Tôi không thường xem phim.</span>
+                    </div>
+                </div>
+
+                <div class="grammar-box">
+                    <h3>4. Thời gian: 上个 / 下个 + 星期 / 月</h3>
+                    <p><b>上个星期 / 上个月:</b> Tuần trước / Tháng trước</p>
+                    <p><b>下个星期 / 下个月:</b> Tuần sau / Tháng sau</p>
+                    <div class="grammar-example" onclick="speak('上个星期我很忙。')">
+                        <b>上个星期我很忙。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Shàng ge xīngqī wǒ hěn máng.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Tuần trước tôi rất bận.</span>
+                    </div>
+                    <div class="grammar-example" onclick="speak('下个月我们一起去旅游吧。')">
+                        <b>下个月我们一起去旅游吧。</b> 🔊<br>
+                        <small style="color:#b2bec3;">Xià ge yuè wǒmen yìqǐ qù lǚyóu ba.</small>
+                        <span style="color:#636e72; font-style:italic; font-size:0.85rem;">Tháng sau chúng ta cùng đi du lịch nhé.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-exercise" class="tab-content">
+                <div id="exercise-container"></div>
+            </div>
+
+            <div id="tab-games" class="tab-content">
+                <div class="game-wrapper">
+                    <div class="game-tabs">
+                        <button class="game-tab-btn fruit active" onclick="switchGame('fruit')">⚔️ Chém Từ</button>
+                        <button class="game-tab-btn memory" onclick="switchGame('memory')">🃏 Lật Thẻ</button>
+                    </div>
+
+                    <div id="panel-fruit" class="game-panel active">
+                        <div class="game-header">
+                            <div class="score-board">
+                                <span>🏆 Điểm: <b id="f-score">0</b></span>
+                                <span>❤️ Mạng: <b id="f-lives">3</b></span>
+                                <span class="combo-badge" id="f-combo">Combo x1</span>
+                            </div>
+                            <button class="btn-restart" onclick="startFruit()">Chơi lại</button>
+                        </div>
+                        <canvas id="canvas-fruit"></canvas>
+                    </div>
+
+                    <div id="panel-memory" class="game-panel">
+                        <div class="game-header">
+                            <div class="score-board">🃏 Đã mở: <b id="m-score">0</b>/6 cặp</div>
+                            <button class="btn-restart" onclick="startMemory()">Chơi lại</button>
+                        </div>
+                        <div class="memory-grid" id="memory-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="writing-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Luyện viết</h3>
+                <button class="btn-close-modal" onclick="closeWritingModal()">×</button>
+            </div>
+            <div style="text-align: center; font-size: 2rem; color: var(--primary); margin: 5px 0;" id="write-char-title"></div>
+            <div class="writing-area">
+                <div class="stroke-target" id="stroke-target"></div>
+                <canvas id="canvas-drawing" width="150" height="150"></canvas>
+            </div>
+            <div class="writing-controls">
+                <button class="btn-clear" onclick="clearCanvas()">Xóa nét</button>
+                <button class="btn-undo" onclick="undoStroke()">Hoàn tác</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==================== 1. DỮ LIỆU & ÂM THANH ==================== */
+        let audioCtx = null;
+        function playTone(freq, type = 'sine', duration = 0.1, vol = 0.08) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        // Particle nền
+        const particleContainer = document.getElementById('particles');
+        for (let i = 0; i < 25; i++) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            const size = Math.random() * 6 + 2;
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.animationDuration = Math.random() * 15 + 15 + 's';
+            p.style.animationDelay = Math.random() * 10 + 's';
+            particleContainer.appendChild(p);
+        }
+
+        // TTS
+        const synth = window.speechSynthesis;
+        let speechRate = 0.9;
+        document.getElementById('speed-slider').addEventListener('input', (e) => {
+            speechRate = parseFloat(e.target.value);
+            document.getElementById('speed-val').innerText = speechRate.toFixed(1) + 'x';
+        });
+
+        function speak(text) {
+            if (!synth) return;
+            if (synth.speaking) synth.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'zh-CN';
+            u.rate = speechRate;
+            const voices = synth.getVoices();
+            const zh = voices.find(v => v.lang.includes('zh'));
+            if (zh) u.voice = zh;
+            synth.speak(u);
+        }
+        synth.onvoiceschanged = () => { synth.getVoices(); };
+
+        /* ==================== 2. TỪ VỰNG ==================== */
+        const vocabData = [
+            { word: "在", pinyin: "zài", meaning: "Đang", char: "在", ex: [
+                {cn: "你在做什么？", py: "Nǐ zài zuò shénme?", vi: "Bạn đang làm gì?"},
+                {cn: "他在看书。", py: "Tā zài kàn shū.", vi: "Anh ấy đang đọc sách."},
+                {cn: "妈妈在做饭，爸爸在看电视。", py: "Māma zài zuò fàn, bàba zài kàn diànshì.", vi: "Mẹ đang nấu ăn, bố đang xem tivi."}
+            ]},
+            { word: "正在", pinyin: "zhèngzài", meaning: "Đang (nhấn mạnh)", char: "正", ex: [
+                {cn: "他正在喝咖啡。", py: "Tā zhèngzài hē kāfēi.", vi: "Anh ấy đang uống cà phê."},
+                {cn: "老师正在上课，请安静。", py: "Lǎoshī zhèngzài shàngkè, qǐng ānjìng.", vi: "Giáo viên đang dạy học, xin hãy yên lặng."},
+                {cn: "外面正在下雨，我们晚点走。", py: "Wàimiàn zhèngzài xià yǔ, wǒmen wǎn diǎn zǒu.", vi: "Bên ngoài đang mưa, chúng ta đi muộn một chút."}
+            ]},
+            { word: "打球", pinyin: "dǎ qiú", meaning: "Chơi bóng", char: "打", ex: [
+                {cn: "你喜欢打什么球？", py: "Nǐ xǐhuan dǎ shénme qiú?", vi: "Bạn thích chơi bóng gì?"},
+                {cn: "周末我们一起去打球吧。", py: "Zhōumò wǒmen yìqǐ qù dǎ qiú ba.", vi: "Cuối tuần chúng ta cùng đi chơi bóng nhé."},
+                {cn: "哥哥很喜欢打篮球。", py: "Gēge hěn xǐhuan dǎ lánqiú.", vi: "Anh trai rất thích chơi bóng rổ."}
+            ]},
+            { word: "听", pinyin: "tīng", meaning: "Nghe", char: "听", ex: [
+                {cn: "你在听什么音乐？", py: "Nǐ zài tīng shénme yīnyuè?", vi: "Bạn đang nghe nhạc gì vậy?"},
+                {cn: "我常常一边走路，一边听音乐。", py: "Wǒ chángcháng yìbiān zǒulù, yìbiān tīng yīnyuè.", vi: "Tôi thường vừa đi bộ vừa nghe nhạc."},
+                {cn: "听老师说话！", py: "Tīng lǎoshī shuōhuà!", vi: "Nghe giáo viên nói này!"}
+            ]},
+            { word: "音乐", pinyin: "yīnyuè", meaning: "Âm nhạc", char: "音", ex: [
+                {cn: "我很喜欢听中国音乐。", py: "Wǒ hěn xǐhuan tīng Zhōngguó yīnyuè.", vi: "Tôi rất thích nghe nhạc Trung Quốc."},
+                {cn: "这个音乐真好听！", py: "Zhège yīnyuè zhēn hǎotīng!", vi: "Bản nhạc này thật hay!"},
+                {cn: "他一边跳舞，一边听音乐。", py: "Tā yìbiān tiàowǔ, yìbiān tīng yīnyuè.", vi: "Anh ấy vừa nhảy vừa nghe nhạc."}
+            ]},
+            { word: "好听", pinyin: "hǎotīng", meaning: "Hay, êm tai", char: "好", ex: [
+                {cn: "他唱歌很好听。", py: "Tā chànggē hěn hǎotīng.", vi: "Anh ấy hát rất hay."},
+                {cn: "这首歌很好听，你听听看。", py: "Zhè shǒu gē hěn hǎotīng, nǐ tīng tīng kàn.", vi: "Bài hát này rất hay, bạn nghe thử xem."},
+                {cn: "中国音乐很好听。", py: "Zhōngguó yīnyuè hěn hǎotīng.", vi: "Nhạc Trung Quốc rất hay."}
+            ]},
+            { word: "一边...一边...", pinyin: "yìbiān...yìbiān...", meaning: "Vừa... vừa...", char: "边", ex: [
+                {cn: "她一边跑步，一边听音乐。", py: "Tā yìbiān pǎobù, yìbiān tīng yīnyuè.", vi: "Cô ấy vừa chạy bộ vừa nghe nhạc."},
+                {cn: "我喜欢一边吃饭，一边看电视。", py: "Wǒ xǐhuan yìbiān chīfàn, yìbiān kàn diànshì.", vi: "Tôi thích vừa ăn cơm vừa xem tivi."},
+                {cn: "他常常一边走路，一边玩手机。", py: "Tā chángcháng yìbiān zǒulù, yìbiān wán shǒujī.", vi: "Anh ấy thường vừa đi đường vừa nghịch điện thoại."}
+            ]},
+            { word: "唱歌", pinyin: "chàng gē", meaning: "Hát", char: "唱", ex: [
+                {cn: "她唱歌非常好听。", py: "Tā chànggē fēicháng hǎotīng.", vi: "Cô ấy hát rất hay."},
+                {cn: "你喜欢唱中文歌吗？", py: "Nǐ xǐhuan chàng Zhōngwén gē ma?", vi: "Bạn có thích hát bài hát tiếng Trung không?"},
+                {cn: "我们一起去唱歌吧。", py: "Wǒmen yìqǐ qù chànggē ba.", vi: "Chúng ta cùng đi hát đi."}
+            ]},
+            { word: "跳舞", pinyin: "tiào wǔ", meaning: "Nhảy múa", char: "跳", ex: [
+                {cn: "她正在跳舞。", py: "Tā zhèngzài tiàowǔ.", vi: "Cô ấy đang nhảy múa."},
+                {cn: "他喜欢跳街舞。", py: "Tā xǐhuan tiào jiēwǔ.", vi: "Anh ấy thích nhảy hip-hop."},
+                {cn: "我喜欢看别人跳舞。", py: "Wǒ xǐhuan kàn biérén tiàowǔ.", vi: "Tôi thích xem người khác nhảy."}
+            ]},
+            { word: "电视", pinyin: "diànshì", meaning: "Tivi", char: "电", ex: [
+                {cn: "我们在看电视。", py: "Wǒmen zài kàn diànshì.", vi: "Chúng tôi đang xem tivi."},
+                {cn: "我喜欢一边吃饭，一边看电视。", py: "Wǒ xǐhuan yìbiān chīfàn, yìbiān kàn diànshì.", vi: "Tôi thích vừa ăn cơm vừa xem tivi."},
+                {cn: "电视里的人是谁？", py: "Diànshì lǐ de rén shì shéi?", vi: "Người trong tivi là ai vậy?"}
+            ]},
+            { word: "周末", pinyin: "zhōumò", meaning: "Cuối tuần", char: "周", ex: [
+                {cn: "你周末喜欢做什么？", py: "Nǐ zhōumò xǐhuan zuò shénme?", vi: "Cuối tuần bạn thích làm gì?"},
+                {cn: "明天是周末，我们去玩吧。", py: "Míngtiān shì zhōumò, wǒmen qù wán ba.", vi: "Mai là cuối tuần, chúng ta đi chơi nhé."},
+                {cn: "下个周末我们一起看电影。", py: "Xià ge zhōumò wǒmen yìqǐ kàn diànyǐng.", vi: "Cuối tuần sau chúng ta cùng xem phim."}
+            ]},
+            { word: "只", pinyin: "zhǐ", meaning: "Chỉ", char: "只", ex: [
+                {cn: "他只学习汉语。", py: "Tā zhǐ xuéxí Hànyǔ.", vi: "Anh ấy chỉ học tiếng Trung."},
+                {cn: "我不喜欢唱歌，我只喜欢听歌。", py: "Wǒ bù xǐhuan chànggē, wǒ zhǐ xǐhuan tīng gē.", vi: "Tôi không thích hát, tôi chỉ thích nghe nhạc."},
+                {cn: "我只有一个哥哥。", py: "Wǒ zhǐ yǒu yí gè gēge.", vi: "Tôi chỉ có một anh trai."}
+            ]},
+            { word: "一起", pinyin: "yìqǐ", meaning: "Cùng nhau", char: "起", ex: [
+                {cn: "我们一起去吃饭吧。", py: "Wǒmen yìqǐ qù chīfàn ba.", vi: "Chúng ta cùng đi ăn cơm nhé."},
+                {cn: "下个周末我们一起看NBA。", py: "Xià ge zhōumò wǒmen yìqǐ kàn NBA.", vi: "Cuối tuần sau chúng ta cùng xem NBA."},
+                {cn: "我想和你一起学中文。", py: "Wǒ xiǎng hé nǐ yìqǐ xué Zhōngwén.", vi: "Tôi muốn cùng bạn học tiếng Trung."}
+            ]}
+        ];
+
+        const vocabContainer = document.getElementById('vocab-container');
+        vocabData.forEach((v, idx) => {
+            const card = document.createElement('div');
+            card.className = 'vocab-card';
+            let exHtml = '';
+            v.ex.forEach(ex => {
+                exHtml += `
+                    <div class="example-item" onclick="speak('${ex.cn}')">
+                        <div class="ex-header">
+                            <div class="ex-cn">${ex.cn}</div>
+                            <div class="ex-icon">🔊</div>
+                        </div>
+                        <span class="ex-py">${ex.py}</span>
+                        <span class="ex-vi">${ex.vi}</span>
+                    </div>
+                `;
+            });
+            card.innerHTML = `
+                <div class="card-header">
+                    <div class="vocab-word">${v.word}</div>
+                    <button class="btn-speak" onclick="speak('${v.word}')">🔊</button>
+                </div>
+                <div class="vocab-pinyin">${v.pinyin}</div>
+                <div class="vocab-meaning">${v.meaning}</div>
+                <div class="example-list">${exHtml}</div>
+                <button class="btn-write" onclick="openWritingModal('${v.char}')">✍️ Luyện viết</button>
+            `;
+            vocabContainer.appendChild(card);
+            setTimeout(() => card.classList.add('show'), idx * 60);
+        });
+
+        /* ==================== 3. BÀI TẬP (ĐÃ CẬP NHẬT LOGIC DUY NHẤT) ==================== */
+        const exerciseData = [
+            { q: "1. 我晚上常常在家看 (   )。", qpy: "Wǒ wǎnshang chángcháng zài jiā kàn (   ).",
+              options: [{t:"音乐", p:"yīnyuè"}, {t:"电视", p:"diànshì"}, {t:"篮球", p:"lánqiú"}], answer: 1 },
+            { q: "2. 我们明天 (   ) 去看电影吧。", qpy: "Wǒmen míngtiān (   ) qù kàn diànyǐng ba.",
+              options: [{t:"一起", p:"yìqǐ"}, {t:"只", p:"zhǐ"}, {t:"正在", p:"zhèngzài"}], answer: 0 },
+            { q: "3. 欧文 (   ) 有一个姐姐。", qpy: "Ōuwén (   ) yǒu yí gè jiějie.",
+              options: [{t:"正在", p:"zhèngzài"}, {t:"一起", p:"yìqǐ"}, {t:"只", p:"zhǐ"}], answer: 2 },
+            { q: "4. 他 (   ) 唱歌，(   ) 跳舞。", qpy: "Tā (   ) chànggē, (   ) tiàowǔ.",
+              options: [{t:"一边...一边...", p:"yìbiān...yìbiān..."}, {t:"正在...在...", p:"zhèngzài...zài..."}, {t:"只...也...", p:"zhǐ...yě..."}], answer: 0 },
+            { q: "5. A: 对不起，我不知道，你问 (   ) 吧。", qpy: "A: Duìbuqǐ, wǒ bù zhīdào, nǐ wèn (   ) ba.",
+              options: [{t:"一起", p:"yìqǐ"}, {t:"别人", p:"biérén"}, {t:"常常", p:"chángcháng"}], answer: 1 },
+            { q: "6. 我非常忙，所以 (   ) 看电影。", qpy: "Wǒ fēicháng máng, suǒyǐ (   ) kàn diànyǐng.",
+              options: [{t:"常常", p:"chángcháng"}, {t:"不常", p:"bù cháng"}, {t:"一起", p:"yìqǐ"}], answer: 1 },
+            { q: "7. (   ) 我和朋友去北京旅游了。", qpy: "(   ) wǒ hé péngyou qù Běijīng lǚyóu le.",
+              options: [{t:"上个星期", p:"shàng ge xīngqī"}, {t:"下个星期", p:"xià ge xīngqī"}, {t:"下个月", p:"xià ge yuè"}], answer: 0 },
+            { q: "8. 我不喜欢运动，我 (   ) 去打球。", qpy: "Wǒ bù xǐhuan yùndòng, wǒ (   ) qù dǎ qiú.",
+              options: [{t:"常常", p:"chángcháng"}, {t:"不常", p:"bù cháng"}, {t:"一起", p:"yìqǐ"}], answer: 1 },
+            { q: "9. 上个 (   ) 是十月，这个月是十一月。", qpy: "Shàng ge (   ) shì shí yuè, zhège yuè shì shíyī yuè.",
+              options: [{t:"月", p:"yuè"}, {t:"星期", p:"xīngqī"}, {t:"周末", p:"zhōumò"}], answer: 0 },
+            { q: "10. 他 (   ) 一边吃饭，一边看书，这个习惯不好。", qpy: "Tā (   ) yìbiān chīfàn, yìbiān kàn shū, zhège xíguàn bù hǎo.",
+              options: [{t:"常常", p:"chángcháng"}, {t:"一起", p:"yìqǐ"}, {t:"不常", p:"bù cháng"}], answer: 0 },
+            { q: "11. (   ) 我们一起去超市买东西吧。", qpy: "(   ) wǒmen yìqǐ qù chāoshì mǎi dōngxi ba.",
+              options: [{t:"下个周末", p:"xià ge zhōumò"}, {t:"上个周末", p:"shàng ge zhōumò"}, {t:"昨天", p:"zuótiān"}], answer: 0 }
+        ];
+
+        const exerciseContainer = document.getElementById('exercise-container');
+        exerciseData.forEach(ex => {
+            const div = document.createElement('div');
+            div.className = 'exercise-item';
+            let btns = ex.options.map((opt, i) =>
+                `<button onclick="checkExercise(this, ${i}, ${ex.answer})">
+                    <span class="opt-text">${opt.t}</span>
+                    <span class="opt-py">${opt.p}</span>
+                 </button>`
+            ).join('');
+            div.innerHTML = `
+                <div class="q-text">${ex.q}</div>
+                <div class="q-pinyin">${ex.qpy}</div>
+                ${btns}
+            `;
+            exerciseContainer.appendChild(div);
+        });
+
+        function checkExercise(btn, sel, ans) {
+            const parent = btn.parentElement;
+            parent.querySelectorAll('button').forEach(b => b.disabled = true);
+            if (sel === ans) {
+                btn.classList.add('correct');
+                playTone(880, 'sine', 0.15);
+            } else {
+                btn.classList.add('wrong');
+                parent.querySelectorAll('button')[ans].classList.add('correct');
+                playTone(300, 'sawtooth', 0.2);
+            }
+        }
+
+        /* ==================== 4. TAB & VIẾT CHỮ ==================== */
+        function switchTab(id, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            btn.classList.add('active');
+            if (id === 'games') {
+                resizeFruitCanvas();
+                startFruit();
+            }
+        }
+
+        const modal = document.getElementById('writing-modal');
+        const canvas = document.getElementById('canvas-drawing');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false, paths = [], curPath = [], hanziWriter = null;
+
+        function openWritingModal(char) {
+            modal.classList.add('active');
+            document.getElementById('write-char-title').innerText = char;
+            clearCanvas();
+            const target = document.getElementById('stroke-target');
+            target.innerHTML = '';
+            if (hanziWriter) hanziWriter = null;
+            hanziWriter = HanziWriter.create('stroke-target', char, {
+                width: 150, height: 150, padding: 5,
+                strokeColor: '#4facfe', radicalColor: '#ff6b6b',
+                showOutline: true, strokeAnimationSpeed: 1.5, delayBetweenStrokes: 200, showCharacter: false
+            });
+            hanziWriter.animateCharacter();
+        }
+        function closeWritingModal() { modal.classList.remove('active'); }
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', endDraw);
+        canvas.addEventListener('mouseout', endDraw);
+        canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); });
+        canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e.touches[0]); });
+        canvas.addEventListener('touchend', endDraw);
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: (e.clientX || e.pageX) - rect.left, y: (e.clientY || e.pageY) - rect.top };
+        }
+        function startDraw(e) {
+            isDrawing = true; curPath = [];
+            const pos = getPos(e);
+            ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+            curPath.push(pos);
+        }
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.stroke();
+            curPath.push(pos);
+        }
+        function endDraw() {
+            if (isDrawing) { paths.push([...curPath]); isDrawing = false; }
+        }
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); paths = [];
+            if (hanziWriter) hanziWriter.cancelQuiz();
+        }
+        function undoStroke() {
+            paths.pop();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            paths.forEach(p => {
+                ctx.beginPath();
+                p.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
+                ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.stroke();
+            });
+        }
+
+        /* ==================== 5. GAME ==================== */
+        function switchGame(game) {
+            document.querySelectorAll('.game-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.game-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + game).classList.add('active');
+            document.querySelector(`.game-tab-btn.${game}`).classList.add('active');
+            if (game === 'fruit') { resizeFruitCanvas(); startFruit(); }
+            if (game === 'memory') startMemory();
+        }
+
+        /* ---------- 5.1 FRUIT NINJA (PHIÊN BẢN MỚI) ---------- */
+        const fCanvas = document.getElementById('canvas-fruit');
+        const fCtx = fCanvas.getContext('2d');
+
+        let fItems = [];          // các "quả" từ vựng đang bay
+        let fJuice = [];          // hạt nước
+        let fHalves = [];         // hai nửa quả bị chém
+        let fScore = 0;
+        let fLives = 3;
+        let fCombo = 0;
+        let fLastSliceTime = 0;
+        let fAnimId = null;
+        let fGameOver = false;
+        let fSpawnTimer = 0;
+
+        // vệt chém
+        let fSliceTrail = [];
+        let fIsPointerDown = false;
+        let fLastPointer = null;
+
+        const gravity = 0.35;
+
+        function resizeFruitCanvas() {
+            if (fCanvas.offsetWidth > 0) {
+                fCanvas.width = fCanvas.offsetWidth;
+                fCanvas.height = fCanvas.offsetHeight;
+            }
+        }
+        window.addEventListener('resize', resizeFruitCanvas);
+
+        const wordsForGame = vocabData.map(v => v.word).filter(w => w.length <= 3);
+
+        class FruitItem {
+            constructor() {
+                const w = fCanvas.width;
+                const h = fCanvas.height;
+                this.w = w; this.h = h;
+                this.text = wordsForGame[Math.floor(Math.random() * wordsForGame.length)];
+                this.radius = 42;
+                // phóng từ đáy lên
+                this.x = Math.random() * (w - 100) + 50;
+                this.y = h + this.radius;
+                this.vx = (Math.random() - 0.5) * 3.5;
+                this.vy = -(Math.random() * 4 + 11); // bay lên
+                this.gravity = gravity;
+                this.sliced = false;
+                this.hue = Math.random() * 360;
+                this.rot = Math.random() * 0.2 - 0.1;
+                this.angle = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity;
+                this.angle += this.rot;
+                if (this.x < this.radius || this.x > this.w - this.radius) this.vx *= -1;
+            }
+            draw() {
+                if (this.sliced) return;
+                fCtx.save();
+                fCtx.translate(this.x, this.y);
+                fCtx.rotate(this.angle);
+                // vẽ "quả" gradient
+                const grad = fCtx.createRadialGradient(-10, -10, 5, 0, 0, this.radius);
+                grad.addColorStop(0, `hsl(${this.hue}, 90%, 75%)`);
+                grad.addColorStop(1, `hsl(${this.hue}, 80%, 45%)`);
+                fCtx.beginPath();
+                fCtx.arc(0, 0, this.radius, 0, Math.PI * 2);
+                fCtx.fillStyle = grad;
+                fCtx.shadowBlur = 25;
+                fCtx.shadowColor = `hsl(${this.hue}, 80%, 60%)`;
+                fCtx.fill();
+                fCtx.shadowBlur = 0;
+                // highlight
+                fCtx.beginPath();
+                fCtx.arc(-12, -14, 8, 0, Math.PI * 2);
+                fCtx.fillStyle = 'rgba(255,255,255,0.5)';
+                fCtx.fill();
+                // chữ
+                fCtx.restore();
+                fCtx.save();
+                fCtx.fillStyle = '#fff';
+                fCtx.font = 'bold 17px "Quicksand", sans-serif';
+                fCtx.textAlign = 'center';
+                fCtx.textBaseline = 'middle';
+                fCtx.shadowColor = 'rgba(0,0,0,0.5)';
+                fCtx.shadowBlur = 4;
+                fCtx.fillText(this.text, this.x, this.y);
+                fCtx.restore();
+            }
+        }
+
+        class JuiceParticle {
+            constructor(x, y, hue) {
+                this.x = x; this.y = y;
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.8) * 10;
+                this.life = 1;
+                this.decay = Math.random() * 0.02 + 0.02;
+                this.color = `hsl(${hue}, 90%, 60%)`;
+                this.size = Math.random() * 5 + 2;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                this.vy += 0.25;
+                this.life -= this.decay;
+            }
+            draw() {
+                fCtx.globalAlpha = Math.max(0, this.life);
+                fCtx.beginPath();
+                fCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                fCtx.fillStyle = this.color;
+                fCtx.fill();
+            }
+        }
+
+        class SliceHalf {
+            constructor(x, y, hue, side) {
+                this.x = x; this.y = y;
+                this.vx = side * (Math.random() * 4 + 2);
+                this.vy = -(Math.random() * 3 + 2);
+                this.life = 1;
+                this.hue = hue;
+                this.side = side;
+                this.size = 42;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                this.vy += gravity;
+                this.life -= 0.015;
+            }
+            draw() {
+                fCtx.save();
+                fCtx.globalAlpha = Math.max(0, this.life);
+                fCtx.translate(this.x, this.y);
+                fCtx.beginPath();
+                // nửa vòng tròn
+                if (this.side === 1) fCtx.arc(0, 0, this.size, -Math.PI/2, Math.PI/2);
+                else fCtx.arc(0, 0, this.size, Math.PI/2, -Math.PI/2);
+                fCtx.closePath();
+                fCtx.fillStyle = `hsl(${this.hue}, 80%, 55%)`;
+                fCtx.fill();
+                fCtx.restore();
+            }
+        }
+
+        function distToSegment(px, py, x1, y1, x2, y2) {
+            const dx = x2 - x1, dy = y2 - y1;
+            const l2 = dx*dx + dy*dy;
+            if (l2 === 0) return Math.hypot(px - x1, py - y1);
+            let t = ((px - x1) * dx + (py - y1) * dy) / l2;
+            t = Math.max(0, Math.min(1, t));
+            return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+        }
+
+        function handlePointerMove(e) {
+            if (fGameOver) return;
+            const rect = fCanvas.getBoundingClientRect();
+            let clientX, clientY;
+            if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            else { clientX = e.clientX; clientY = e.clientY; }
+            const mx = clientX - rect.left;
+            const my = clientY - rect.top;
+
+            fSliceTrail.push({ x: mx, y: my, life: 1 });
+            if (fSliceTrail.length > 12) fSliceTrail.shift();
+
+            if (fLastPointer) {
+                // kiểm tra cắt
+                fItems.forEach(item => {
+                    if (item.sliced) return;
+                    const d = distToSegment(item.x, item.y, fLastPointer.x, fLastPointer.y, mx, my);
+                    if (d < item.radius) {
+                        sliceFruit(item);
+                    }
+                });
+            }
+            fLastPointer = { x: mx, y: my };
+        }
+
+        function sliceFruit(item) {
+            item.sliced = true;
+            const now = performance.now();
+            if (now - fLastSliceTime < 700) {
+                fCombo++;
+            } else {
+                fCombo = 1;
+            }
+            fLastSliceTime = now;
+            const comboMult = Math.min(fCombo, 5);
+            const pts = 10 * comboMult;
+            fScore += pts;
+            document.getElementById('f-score').innerText = fScore;
+
+            // hiệu ứng
+            playTone(1000 + fCombo * 100, 'triangle', 0.1);
+            speak(item.text);
+
+            for (let i = 0; i < 25; i++) fJuice.push(new JuiceParticle(item.x, item.y, item.hue));
+            fHalves.push(new SliceHalf(item.x, item.y, item.hue, 1));
+            fHalves.push(new SliceHalf(item.x, item.y, item.hue, -1));
+
+            // combo badge
+            const badge = document.getElementById('f-combo');
+            if (fCombo > 1) {
+                badge.innerText = `Combo x${comboMult}`;
+                badge.classList.add('active');
+            } else {
+                badge.classList.remove('active');
+            }
+        }
+
+        // Gắn sự kiện pointer
+        fCanvas.addEventListener('mousedown', (e) => {
+            fIsPointerDown = true;
+            const rect = fCanvas.getBoundingClientRect();
+            fLastPointer = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            fSliceTrail = [];
+        });
+        fCanvas.addEventListener('mousemove', (e) => {
+            if (fIsPointerDown) handlePointerMove(e);
+        });
+        fCanvas.addEventListener('mouseup', () => { fIsPointerDown = false; fLastPointer = null; });
+        fCanvas.addEventListener('mouseleave', () => { fIsPointerDown = false; fLastPointer = null; fSliceTrail = []; });
+
+        fCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            fIsPointerDown = true;
+            const rect = fCanvas.getBoundingClientRect();
+            fLastPointer = { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+            fSliceTrail = [];
+        }, { passive: false });
+        fCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (fIsPointerDown) handlePointerMove(e);
+        }, { passive: false });
+        fCanvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            fIsPointerDown = false;
+            fLastPointer = null;
+        }, { passive: false });
+
+        function startFruit() {
+            if (fCanvas.offsetWidth === 0) return;
+            resizeFruitCanvas();
+            fItems = []; fJuice = []; fHalves = [];
+            fScore = 0; fLives = 3; fCombo = 0; fGameOver = false;
+            fSpawnTimer = 0; fLastSliceTime = 0;
+            fSliceTrail = []; fLastPointer = null; fIsPointerDown = false;
+            document.getElementById('f-score').innerText = 0;
+            document.getElementById('f-lives').innerText = 3;
+            document.getElementById('f-combo').classList.remove('active');
+            if (fAnimId) cancelAnimationFrame(fAnimId);
+
+            function loop() {
+                if (fGameOver) return;
+                fCtx.clearRect(0, 0, fCanvas.width, fCanvas.height);
+
+                // spawn
+                fSpawnTimer++;
+                if (fSpawnTimer > 55 && fItems.length < 7) {
+                    fItems.push(new FruitItem());
+                    fSpawnTimer = 0;
+                }
+
+                // update fruits
+                for (let i = fItems.length - 1; i >= 0; i--) {
+                    const it = fItems[i];
+                    it.update();
+                    it.draw();
+                    if (it.sliced) {
+                        fItems.splice(i, 1);
+                    } else if (it.y > fCanvas.height + it.radius * 2 && it.vy > 0) {
+                        // rơi khỏi màn hình
+                        fItems.splice(i, 1);
+                        fLives--;
+                        document.getElementById('f-lives').innerText = fLives;
+                        fCombo = 0;
+                        document.getElementById('f-combo').classList.remove('active');
+                        playTone(250, 'sawtooth', 0.25);
+                        if (fLives <= 0) {
+                            fGameOver = true;
+                            setTimeout(() => alert('Game Over! Điểm: ' + fScore), 200);
+                            return;
+                        }
+                    }
+                }
+
+                // update juice
+                for (let i = fJuice.length - 1; i >= 0; i--) {
+                    const p = fJuice[i];
+                    p.update(); p.draw();
+                    if (p.life <= 0) fJuice.splice(i, 1);
+                }
+
+                // update halves
+                for (let i = fHalves.length - 1; i >= 0; i--) {
+                    const h = fHalves[i];
+                    h.update(); h.draw();
+                    if (h.life <= 0) fHalves.splice(i, 1);
+                }
+
+                // vẽ vệt chém
+                if (fSliceTrail.length > 1) {
+                    fCtx.save();
+                    fCtx.lineCap = 'round';
+                    fCtx.lineJoin = 'round';
+                    for (let i = 1; i < fSliceTrail.length; i++) {
+                        const p1 = fSliceTrail[i-1];
+                        const p2 = fSliceTrail[i];
+                        const alpha = i / fSliceTrail.length;
+                        fCtx.beginPath();
+                        fCtx.moveTo(p1.x, p1.y);
+                        fCtx.lineTo(p2.x, p2.y);
+                        fCtx.strokeStyle = `rgba(255,255,255,${alpha * 0.9})`;
+                        fCtx.lineWidth = 6 * alpha + 1;
+                        fCtx.shadowColor = '#fff';
+                        fCtx.shadowBlur = 10;
+                        fCtx.stroke();
+                    }
+                    fCtx.restore();
+                }
+
+                fCtx.globalAlpha = 1;
+                fAnimId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        /* ---------- 5.2 MEMORY ---------- */
+        let mCards = [], mFlipped = [], mMatched = 0, mLock = false;
+
+        function startMemory() {
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            mFlipped = []; mMatched = 0; mLock = false;
+            document.getElementById('m-score').innerText = 0;
+
+            const selected = [...vocabData].sort(() => 0.5 - Math.random()).slice(0, 6);
+            mCards = [];
+            selected.forEach(v => {
+                mCards.push({ id: v.word, text: v.word, type: 'word' });
+                mCards.push({ id: v.word, text: v.meaning, type: 'meaning' });
+            });
+            mCards.sort(() => 0.5 - Math.random());
+
+            mCards.forEach((card, i) => {
+                const el = document.createElement('div');
+                el.className = 'memory-card';
+                el.dataset.id = card.id;
+                el.dataset.idx = i;
+                el.innerHTML = `
+                    <div class="memory-card-inner">
+                        <div class="memory-front"></div>
+                        <div class="memory-back">${card.text}</div>
+                    </div>
+                `;
+                el.addEventListener('click', () => flipMemoryCard(el));
+                grid.appendChild(el);
+            });
+        }
+
+        function flipMemoryCard(el) {
+            if (mLock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+            el.classList.add('flipped');
+            const cardData = mCards[el.dataset.idx];
+            if (cardData.type === 'word') speak(cardData.text);
+            playTone(600, 'sine', 0.08);
+
+            mFlipped.push(el);
+
+            if (mFlipped.length === 2) {
+                mLock = true;
+                const c1 = mFlipped[0], c2 = mFlipped[1];
+                if (c1.dataset.id === c2.dataset.id) {
+                    setTimeout(() => {
+                        c1.classList.add('matched'); c2.classList.add('matched');
+                        playTone(900, 'sine', 0.2);
+                        mMatched++;
+                        document.getElementById('m-score').innerText = mMatched;
+                        mFlipped = []; mLock = false;
+                        if (mMatched === 6) setTimeout(() => alert('Chúc mừng! Bạn đã mở hết.'), 300);
+                    }, 600);
+                } else {
+                    setTimeout(() => {
+                        c1.classList.remove('flipped'); c2.classList.remove('flipped');
+                        mFlipped = []; mLock = false;
+                        playTone(300, 'sawtooth', 0.15);
+                    }, 1000);
+                }
+            }
+        }
+
+        /* ==================== KHỞI TẠO ==================== */
+        window.addEventListener('load', () => {
+            setTimeout(resizeFruitCanvas, 150);
+        });
+    </script>
+</body>
+</html>
